@@ -1,3 +1,5 @@
+import ScrollReveal from "./scroll-reveal";
+
 const projects = [
   {
     id: "kCg8ZFXfDkE",
@@ -95,29 +97,30 @@ export default function Home() {
         <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-white/[0.015] blur-3xl" />
 
         <div className="relative mx-auto max-w-5xl">
-          <h2 className="mb-4 text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Projects
-          </h2>
-          <p className="mx-auto mb-16 max-w-md text-center text-white/50">
-            Some of my recent edits — clean cuts, on-beat transitions, cinematic feel.
-          </p>
+          <ScrollReveal>
+            <h2 className="mb-4 text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Projects
+            </h2>
+            <p className="mx-auto mb-16 max-w-md text-center text-white/50">
+              Some of my recent edits — clean cuts, on-beat transitions, cinematic feel.
+            </p>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-white/5"
-              >
-                <div className="relative aspect-[9/16] w-full overflow-hidden">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${project.id}?rel=0&modestbranding=1`}
-                    title={project.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 h-full w-full border-0"
-                  />
+            {projects.map((project, i) => (
+              <ScrollReveal key={project.id} delay={i * 150}>
+                <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-white/5">
+                  <div className="relative aspect-[9/16] w-full overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${project.id}?rel=0&modestbranding=1`}
+                      title={project.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 h-full w-full border-0"
+                    />
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -129,39 +132,45 @@ export default function Home() {
         <div className="pointer-events-none absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.02] blur-3xl" />
 
         <div className="relative mx-auto max-w-xl text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Get in Touch
-          </h2>
-          <p className="mb-12 text-white/50">
-            Reach out to me through any of these.
-          </p>
+          <ScrollReveal>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Get in Touch
+            </h2>
+            <p className="mb-12 text-white/50">
+              Reach out to me through any of these.
+            </p>
+          </ScrollReveal>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            {/* Email */}
-            <a
-              href="mailto:nem.nothing07@gmail.com"
-              className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/25 hover:bg-white/10 hover:scale-105 active:scale-95"
-            >
-              <svg className="h-5 w-5 text-white/60 transition-colors group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-              </svg>
-              <span className="text-sm">nem.nothing07@gmail.com</span>
-            </a>
+          <ScrollReveal delay={200}>
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+              {/* Email */}
+              <a
+                href="mailto:nem.nothing07@gmail.com"
+                className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/25 hover:bg-white/10 hover:scale-105 active:scale-95"
+              >
+                <svg className="h-5 w-5 text-white/60 transition-colors group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <span className="text-sm">nem.nothing07@gmail.com</span>
+              </a>
 
-            {/* Discord */}
-            <div className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-indigo-500/10">
-              <svg className="h-5 w-5 text-white/60 transition-colors group-hover:text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-              </svg>
-              <span className="text-sm">r3vryn</span>
+              {/* Discord */}
+              <div className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-indigo-500/10">
+                <svg className="h-5 w-5 text-white/60 transition-colors group-hover:text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                </svg>
+                <span className="text-sm">r3vryn</span>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
 
         {/* Footer */}
-        <div className="relative mt-20 text-center text-sm text-white/25">
-          &copy; 2025 nem. All rights reserved.
-        </div>
+        <ScrollReveal delay={400}>
+          <div className="mt-20 text-center text-sm text-white/25">
+            &copy; 2026 nem. All rights reserved.
+          </div>
+        </ScrollReveal>
       </section>
     </div>
   );

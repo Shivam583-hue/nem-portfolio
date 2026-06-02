@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "nem | Shorts & AMV Editor",
+  title: "nem | freelance short video editor",
   description: "Portfolio of nem - Cinematic shorts and anime music video editor",
 };
 

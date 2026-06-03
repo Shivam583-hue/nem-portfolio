@@ -153,135 +153,55 @@ const VideoCard = memo(function VideoCard({
   id: string;
   title: string;
 }) {
-  const [state, setState] = useState<"idle" | "preview" | "playing">("idle");
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const tiltRaf = useRef(0);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    cancelAnimationFrame(tiltRaf.current);
-    tiltRaf.current = requestAnimationFrame(() => {
-      const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const rotateX = (0.5 - y) * 12;
-      const rotateY = (x - 0.5) * 12;
-      el.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
-    });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    cancelAnimationFrame(tiltRaf.current);
-    const el = cardRef.current;
-    if (!el) return;
-    el.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)";
-    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-    if (state === "preview") setState("idle");
-  }, [state]);
-
-  const handleMouseEnter = useCallback(() => {
-    if (state === "playing") return;
-    hoverTimeout.current = setTimeout(() => setState("preview"), 400);
-  }, [state]);
+  const [playing, setPlaying] = useState(false);
 
   const handleClick = useCallback(() => {
-    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-    setState("playing");
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      cancelAnimationFrame(tiltRaf.current);
-      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-    };
+    setPlaying(true);
   }, []);
 
   return (
-    <div
-      ref={cardRef}
-      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20"
-      style={{
-        transition: "transform 0.2s ease-out, border-color 0.5s, box-shadow 0.5s",
-        transformStyle: "preserve-3d",
-        willChange: "transform",
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseEnter={handleMouseEnter}
-    >
-      {/* Inner content with slight Z-offset for depth */}
-      <div style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
-        <div className="relative aspect-[9/16] w-full overflow-hidden">
-          {state === "playing" ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`}
-              title={title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 transition-colors duration-300 hover:border-white/20">
+      <div className="relative aspect-[9/16] w-full overflow-hidden">
+        {playing ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        ) : (
+          <button
+            type="button"
+            className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
+            onClick={handleClick}
+            aria-label={`Play ${title}`}
+          >
+            <img
+              src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
+              alt=""
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
-              className="absolute inset-0 h-full w-full border-0"
             />
-          ) : state === "preview" ? (
-            <>
-              <iframe
-                src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1&mute=1&controls=0&showinfo=0`}
-                title={title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                loading="lazy"
-                className="absolute inset-0 h-full w-full border-0"
-              />
-              <button
-                type="button"
-                onClick={handleClick}
-                className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-transparent"
-                aria-label={`Play ${title} with sound`}
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 hover:scale-110">
-                  <svg
-                    className="h-7 w-7 text-white"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
-              onClick={handleClick}
-              aria-label={`Play ${title}`}
-            >
-              <img
-                src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
-                alt=""
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-300 group-hover:bg-black/10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                  <svg
-                    className="h-7 w-7 text-white/90"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-300 group-hover:bg-black/10">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+                <svg
+                  className="h-7 w-7 text-white/90"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
               </div>
-            </button>
-          )}
-        </div>
-        <p className="px-4 py-3 text-center text-sm font-medium text-white/70">
-          {title}
-        </p>
+            </div>
+          </button>
+        )}
       </div>
+      <p className="px-4 py-3 text-center text-sm font-medium text-white/70">
+        {title}
+      </p>
     </div>
   );
 });

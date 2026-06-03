@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, memo } from "react";
+import dynamic from "next/dynamic";
 import ScrollReveal from "./scroll-reveal";
+
+const CustomCursor = dynamic(() => import("./custom-cursor"), { ssr: false });
 
 // ── Magnetic Button ──
 function MagneticButton({
@@ -136,107 +139,152 @@ function StaggeredTitle({ visible }: { visible: boolean }) {
   );
 }
 
-// ── Video Card with Hover Preview ──
+// ── Video Card with 3D Tilt ──
 const projects = [
   { id: "kCg8ZFXfDkE", title: "Edit #1" },
   { id: "fQ7S6kTW-WQ", title: "Edit #2" },
   { id: "W7hyllNaac8", title: "Edit #3" },
 ];
 
-function VideoCard({ id, title }: { id: string; title: string }) {
+const VideoCard = memo(function VideoCard({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}) {
   const [state, setState] = useState<"idle" | "preview" | "playing">("idle");
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const tiltRaf = useRef(0);
 
-  const handleMouseEnter = () => {
-    if (state === "playing") return;
-    hoverTimeout.current = setTimeout(() => setState("preview"), 400);
-  };
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    cancelAnimationFrame(tiltRaf.current);
+    tiltRaf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const rotateX = (0.5 - y) * 12;
+      const rotateY = (x - 0.5) * 12;
+      el.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
+    });
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
+    cancelAnimationFrame(tiltRaf.current);
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)";
     if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
     if (state === "preview") setState("idle");
-  };
+  }, [state]);
 
-  const handleClick = () => {
+  const handleMouseEnter = useCallback(() => {
+    if (state === "playing") return;
+    hoverTimeout.current = setTimeout(() => setState("preview"), 400);
+  }, [state]);
+
+  const handleClick = useCallback(() => {
     if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
     setState("playing");
-  };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(tiltRaf.current);
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    };
+  }, []);
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all duration-500 hover:border-white/25 hover:shadow-2xl hover:shadow-white/5"
-      onMouseEnter={handleMouseEnter}
+      ref={cardRef}
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20"
+      style={{
+        transition: "transform 0.2s ease-out, border-color 0.5s, box-shadow 0.5s",
+        transformStyle: "preserve-3d",
+        willChange: "transform",
+      }}
+      onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
     >
-      <div className="relative aspect-[9/16] w-full overflow-hidden">
-        {state === "playing" ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
-        ) : state === "preview" ? (
-          <>
+      {/* Inner content with slight Z-offset for depth */}
+      <div style={{ transform: "translateZ(20px)", transformStyle: "preserve-3d" }}>
+        <div className="relative aspect-[9/16] w-full overflow-hidden">
+          {state === "playing" ? (
             <iframe
-              src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1&mute=1&controls=0&showinfo=0`}
+              src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`}
               title={title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
               className="absolute inset-0 h-full w-full border-0"
             />
+          ) : state === "preview" ? (
+            <>
+              <iframe
+                src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1&mute=1&controls=0&showinfo=0`}
+                title={title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full border-0"
+              />
+              <button
+                type="button"
+                onClick={handleClick}
+                className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-transparent"
+                aria-label={`Play ${title} with sound`}
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 hover:scale-110">
+                  <svg
+                    className="h-7 w-7 text-white"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </button>
+            </>
+          ) : (
             <button
               type="button"
+              className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
               onClick={handleClick}
-              className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-transparent"
-              aria-label={`Play ${title} with sound`}
+              aria-label={`Play ${title}`}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 hover:scale-110">
-                <svg
-                  className="h-7 w-7 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+              <img
+                src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
+                alt=""
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-300 group-hover:bg-black/10">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+                  <svg
+                    className="h-7 w-7 text-white/90"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </div>
             </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
-            onClick={handleClick}
-            aria-label={`Play ${title}`}
-          >
-            <img
-              src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
-              alt=""
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-300 group-hover:bg-black/10">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                <svg
-                  className="h-7 w-7 text-white/90"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          </button>
-        )}
+          )}
+        </div>
+        <p className="px-4 py-3 text-center text-sm font-medium text-white/70">
+          {title}
+        </p>
       </div>
-      <p className="px-4 py-3 text-center text-sm font-medium text-white/70">
-        {title}
-      </p>
     </div>
   );
-}
+});
 
 // ── Discord Button ──
 function DiscordButton() {
@@ -278,6 +326,7 @@ export default function Home() {
   return (
     <>
       {!loaded && <LoadingScreen onComplete={handleLoadComplete} />}
+      <CustomCursor />
 
       <div
         className={`w-full transition-opacity duration-700 ${
@@ -293,6 +342,7 @@ export default function Home() {
               loop
               muted
               playsInline
+              preload="metadata"
               className="h-full w-full object-cover blur-sm"
             >
               <source src="/video.mp4" type="video/mp4" />
@@ -413,6 +463,7 @@ export default function Home() {
         <section
           id="projects"
           className="section-snap relative w-full overflow-hidden py-24 section-gradient-projects"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}
         >
           {/* Subtle gradient accents */}
           <div className="pointer-events-none absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/[0.02] blur-3xl" />
@@ -443,7 +494,10 @@ export default function Home() {
         </section>
 
         {/* ── Contact Section ── */}
-        <section className="section-snap relative w-full overflow-hidden border-t border-white/10 px-4 py-24 section-gradient-contact">
+        <section
+          className="section-snap relative w-full overflow-hidden border-t border-white/10 px-4 py-24 section-gradient-contact"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}
+        >
           {/* Subtle gradient accent */}
           <div className="pointer-events-none absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.02] blur-3xl" />
 

@@ -10,13 +10,13 @@ export default function CustomCursor() {
   const visible = useRef(false);
   const hovering = useRef(false);
   const raf = useRef(0);
-  const [isTouch, setIsTouch] = useState(true);
+  // Rendered with ssr: false, so window is available on first render
+  const [isTouch] = useState(
+    () => window.matchMedia("(pointer: coarse)").matches
+  );
 
   useEffect(() => {
-    // Detect touch device — hide custom cursor entirely
-    const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    if (hasCoarsePointer) return;
-    setIsTouch(false);
+    if (isTouch) return;
 
     const onMouseMove = (e: MouseEvent) => {
       pos.current.x = e.clientX;
@@ -62,6 +62,16 @@ export default function CustomCursor() {
       if (ringRef.current) ringRef.current.style.opacity = "0";
     };
 
+    // Cross-origin iframes (YouTube embeds) swallow mouse events, which
+    // would freeze the custom cursor at the iframe edge — hide it instead
+    // and let the embed's native cursor take over.
+    const onMouseOut = (e: MouseEvent) => {
+      const related = e.relatedTarget as HTMLElement | null;
+      if (related?.tagName === "IFRAME") {
+        onMouseLeave();
+      }
+    };
+
     const animate = () => {
       // Dot follows instantly
       if (dotRef.current) {
@@ -80,16 +90,18 @@ export default function CustomCursor() {
 
     document.addEventListener("mousemove", onMouseMove, { passive: true });
     document.addEventListener("mouseover", onMouseOver, { passive: true });
+    document.addEventListener("mouseout", onMouseOut, { passive: true });
     document.documentElement.addEventListener("mouseleave", onMouseLeave);
     raf.current = requestAnimationFrame(animate);
 
     return () => {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseover", onMouseOver);
+      document.removeEventListener("mouseout", onMouseOut);
       document.documentElement.removeEventListener("mouseleave", onMouseLeave);
       cancelAnimationFrame(raf.current);
     };
-  }, []);
+  }, [isTouch]);
 
   if (isTouch) return null;
 

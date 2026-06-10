@@ -6,6 +6,8 @@ import ScrollReveal from "./scroll-reveal";
 
 const CustomCursor = dynamic(() => import("./custom-cursor"), { ssr: false });
 
+const displayFont = { fontFamily: "var(--font-display), sans-serif" };
+
 // ── Magnetic Button ──
 function MagneticButton({
   children,
@@ -89,9 +91,8 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[10000] flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-700 ${
-        phase === "exit" ? "opacity-0" : "opacity-100"
-      }`}
+      className={`fixed inset-0 z-[10000] flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-700 ${phase === "exit" ? "opacity-0" : "opacity-100"
+        }`}
     >
       <div className="relative flex items-center gap-[2px]">
         {"nem".split("").map((letter, i) => (
@@ -99,7 +100,7 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
             key={i}
             className="loader-letter text-6xl font-bold tracking-[-0.06em] text-white sm:text-8xl"
             style={{
-              fontFamily: "var(--font-display), sans-serif",
+              ...displayFont,
               animationDelay: `${200 + i * 150}ms`,
             }}
           >
@@ -115,13 +116,58 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+// ── Fixed Nav (appears after the hero) ──
+function Nav() {
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShown(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-[100] border-b border-white/5 bg-[#0a0a0a]/70 backdrop-blur-md transition-all duration-500 ${shown
+        ? "translate-y-0 opacity-100"
+        : "pointer-events-none -translate-y-full opacity-0"
+        }`}
+    >
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10">
+        <a
+          href="#top"
+          className="text-lg font-bold tracking-[-0.04em] text-white"
+          style={displayFont}
+        >
+          nem<span className="text-accent">.</span>
+        </a>
+        <div className="flex items-center gap-8">
+          <a
+            href="#work"
+            className="link-underline text-xs font-medium uppercase tracking-[0.25em] text-white/60 transition-colors duration-300 hover:text-white"
+          >
+            Work
+          </a>
+          <a
+            href="#contact"
+            className="link-underline text-xs font-medium uppercase tracking-[0.25em] text-white/60 transition-colors duration-300 hover:text-white"
+          >
+            Contact
+          </a>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
 // ── Staggered Hero Title ──
 function StaggeredTitle({ visible }: { visible: boolean }) {
   const letters = "nem".split("");
   return (
     <h1
-      className="mb-2 text-7xl font-bold tracking-[-0.06em] text-white sm:text-8xl"
-      style={{ fontFamily: "var(--font-display), sans-serif" }}
+      className="text-[clamp(4rem,12vw,7rem)] font-bold leading-[0.85] tracking-[-0.06em] text-white"
+      style={displayFont}
     >
       {letters.map((letter, i) => (
         <span
@@ -135,11 +181,21 @@ function StaggeredTitle({ visible }: { visible: boolean }) {
           {letter}
         </span>
       ))}
+      <span
+        className="stagger-letter inline-block text-accent"
+        style={{
+          animationDelay: visible ? `${600 + letters.length * 120}ms` : "0ms",
+          animationPlayState: visible ? "running" : "paused",
+        }}
+      >
+        .
+      </span>
     </h1>
   );
 }
 
-// ── Video Card with 3D Tilt ──
+
+// ── Video Card with Hover Preview ──
 const projects = [
   { id: "kCg8ZFXfDkE", title: "Edit #1" },
   { id: "fQ7S6kTW-WQ", title: "Edit #2" },
@@ -149,19 +205,43 @@ const projects = [
 const VideoCard = memo(function VideoCard({
   id,
   title,
+  index,
 }: {
   id: string;
   title: string;
+  index: number;
 }) {
   const [playing, setPlaying] = useState(false);
+  const [preview, setPreview] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
+  const [thumbFallback, setThumbFallback] = useState(false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startPreview = useCallback(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    hoverTimer.current = setTimeout(() => setPreview(true), 250);
+  }, []);
+
+  const stopPreview = useCallback(() => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setPreview(false);
+    setPreviewReady(false);
+  }, []);
 
   const handleClick = useCallback(() => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setPreview(false);
+    setPreviewReady(false);
     setPlaying(true);
   }, []);
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 transition-colors duration-300 hover:border-white/20">
-      <div className="relative aspect-[9/16] w-full overflow-hidden">
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 transition-colors duration-300 hover:border-white/25">
+      <div
+        className="relative aspect-[9/16] w-full overflow-hidden"
+        onMouseEnter={playing ? undefined : startPreview}
+        onMouseLeave={playing ? undefined : stopPreview}
+      >
         {playing ? (
           <iframe
             src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`}
@@ -172,36 +252,63 @@ const VideoCard = memo(function VideoCard({
             className="absolute inset-0 h-full w-full border-0"
           />
         ) : (
-          <button
-            type="button"
-            className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
-            onClick={handleClick}
-            aria-label={`Play ${title}`}
-          >
-            <img
-              src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
-              alt=""
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-300 group-hover:bg-black/10">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                <svg
-                  className="h-7 w-7 text-white/90"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+          <>
+            <button
+              type="button"
+              className="absolute inset-0 h-full w-full cursor-pointer border-0 bg-black"
+              onClick={handleClick}
+              aria-label={`Play ${title}`}
+            >
+              <img
+                src={`https://i.ytimg.com/vi/${id}/${thumbFallback ? "hqdefault" : "maxresdefault"
+                  }.jpg`}
+                alt=""
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                onError={() => setThumbFallback(true)}
+              />
+              <div
+                className={`absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-500 group-hover:bg-black/10 ${previewReady ? "opacity-0" : "opacity-100"
+                  }`}
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+                  <svg
+                    className="h-7 w-7 text-white/90"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </div>
+            </button>
+            {preview && (
+              <iframe
+                src={`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&rel=0&modestbranding=1&playsinline=1`}
+                title=""
+                aria-hidden="true"
+                tabIndex={-1}
+                onLoad={() => setPreviewReady(true)}
+                className={`pointer-events-none absolute inset-0 h-full w-full border-0 transition-opacity duration-500 ${previewReady ? "opacity-100" : "opacity-0"
+                  }`}
+              />
+            )}
+            <div
+              className={`pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80 backdrop-blur-sm transition-opacity duration-500 ${previewReady ? "opacity-100" : "opacity-0"
+                }`}
+            >
+              Click for sound
             </div>
-          </button>
+          </>
         )}
       </div>
-      <p className="px-4 py-3 text-center text-sm font-medium text-white/70">
-        {title}
-      </p>
+      <div className="flex items-center gap-3 px-5 py-4">
+        <span className="font-mono text-xs text-accent">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="text-sm font-medium text-white/80">{title}</span>
+      </div>
     </div>
   );
 });
@@ -234,97 +341,173 @@ function DiscordButton() {
   );
 }
 
+// ── Local Time (footer) ──
+function LocalTime() {
+  const [time, setTime] = useState("--:--");
+
+  useEffect(() => {
+    const update = () =>
+      setTime(
+        new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "Asia/Kolkata",
+        }).format(new Date())
+      );
+    update();
+    const id = setInterval(update, 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  return <span className="font-mono text-sm text-white/40">IST — {time}</span>;
+}
+
+// ── Section Eyebrow ──
+function Eyebrow({ number, label }: { number: string; label: string }) {
+  return (
+    <p className="mb-5 font-mono text-xs uppercase tracking-[0.35em] text-white/40">
+      <span className="text-accent">{number}</span> — {label}
+    </p>
+  );
+}
+
 // ── Main Page ──
 export default function Home() {
-  const [loaded, setLoaded] = useState(false);
+  const [intro, setIntro] = useState<"pending" | "loader" | "done">("pending");
   const [siteVisible, setSiteVisible] = useState(false);
+  const parallaxRef = useRef<HTMLDivElement>(null);
+
+  // Show the intro loader once per session
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      if (sessionStorage.getItem("nem-intro-seen")) {
+        setIntro("done");
+        setTimeout(() => setSiteVisible(true), 50);
+      } else {
+        sessionStorage.setItem("nem-intro-seen", "1");
+        setIntro("loader");
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const handleLoadComplete = useCallback(() => {
-    setLoaded(true);
+    setIntro("done");
     setTimeout(() => setSiteVisible(true), 100);
+  }, []);
+
+  // Hero video parallax
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const y = Math.min(window.scrollY, window.innerHeight) * 0.25;
+        if (parallaxRef.current) {
+          parallaxRef.current.style.transform = `translate3d(0, ${y}px, 0)`;
+        }
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
     <>
-      {!loaded && <LoadingScreen onComplete={handleLoadComplete} />}
+      {intro === "loader" && <LoadingScreen onComplete={handleLoadComplete} />}
       <CustomCursor />
+      <Nav />
 
       <div
-        className={`w-full transition-opacity duration-700 ${
-          siteVisible ? "opacity-100" : "opacity-0"
-        }`}
+        id="top"
+        className={`w-full transition-opacity duration-700 ${siteVisible ? "opacity-100" : "opacity-0"
+          }`}
       >
         {/* ── Hero Section ── */}
         <section className="section-snap relative min-h-[100svh] w-full overflow-hidden">
-          {/* Background video */}
-          <div className="absolute inset-0 z-0">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              className="h-full w-full object-cover blur-sm"
-            >
-              <source src="/video.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-black/70" />
+          {/* Background video — blurred, with parallax */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <div ref={parallaxRef} className="absolute inset-0 will-change-transform">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                poster="/hero-poster.jpg"
+                className="h-full w-full scale-[1.15] object-cover blur-md"
+              >
+                <source src="/video.mp4" type="video/mp4" />
+              </video>
+            </div>
+            {/* Darkened scrim for the glass card */}
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
           </div>
 
-          {/* Content */}
-          <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-4 py-16">
+          {/* Content — centered glass card */}
+          <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 py-24 sm:px-10">
             <div
-              className={`w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl sm:p-10 transition-all duration-1000 ${
-                siteVisible
-                  ? "opacity-100 translate-y-0 scale-100"
-                  : "opacity-0 translate-y-8 scale-[0.97]"
-              }`}
-              style={{
-                boxShadow: "0 0 30px rgba(255,255,255,0.05)",
-              }}
+              className={`w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl transition-all duration-700 sm:p-12 ${siteVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+                }`}
+              style={{ transitionDelay: "400ms" }}
             >
+              <div
+                className={`mb-6 transition-all duration-700 ${siteVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
+                style={{ transitionDelay: "1200ms" }}
+              >
+              </div>
+
               <StaggeredTitle visible={siteVisible} />
 
               <p
-                className={`mb-6 text-lg font-medium text-white/75 transition-all duration-700 ${
-                  siteVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
+                className={`mt-5 text-sm font-medium uppercase tracking-[0.3em] text-white/60 transition-all duration-700 ${siteVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
                 style={{ transitionDelay: "1000ms" }}
               >
-                Freelance Short Video Editor
+                Freelance short video editor
               </p>
 
               <p
-                className={`mb-8 leading-relaxed text-white/90 transition-all duration-700 ${
-                  siteVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: "1200ms" }}
+                className={`mt-6 leading-relaxed text-white/80 transition-all duration-700 ${siteVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
+                style={{ transitionDelay: "1300ms" }}
               >
                 I&apos;m a self-taught video editor with short length video
-                editing experience. I focus on clean transitions, effects which
-                suit the edit, engaging subtitles, sound effects, and high
-                quality upscaled edits to maximize audience retention.
+                editing experience. I focus on clean transitions, effects
+                which suit the edit, engaging subtitles, sound effects, and
+                high quality upscaled edits to maximize audience retention.
               </p>
 
               <div
-                className={`flex flex-col gap-4 sm:flex-row transition-all duration-700 ${
-                  siteVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: "1400ms" }}
+                className={`mt-8 flex flex-col gap-4 sm:flex-row transition-all duration-700 ${siteVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
+                style={{ transitionDelay: "1500ms" }}
               >
                 <MagneticButton
                   href="https://www.youtube.com/@nowherenem"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex h-12 items-center justify-center gap-3 rounded-full bg-red-600 px-6 font-medium text-white transition-colors duration-300 hover:bg-red-500 hover:shadow-lg hover:shadow-red-500/25"
+                  className="group flex h-12 items-center justify-center gap-3 rounded-full bg-red-600 px-6 font-medium text-white transition-colors duration-300 hover:bg-red-500"
                 >
                   <svg
-                    className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                    className="h-5 w-5 text-white"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -337,10 +520,10 @@ export default function Home() {
                   href="https://www.instagram.com/nowherenem"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/20 px-6 font-medium text-white transition-colors duration-300 hover:border-pink-500/50 hover:bg-pink-500/10 hover:shadow-lg hover:shadow-pink-500/20"
+                  className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-colors duration-300 hover:border-pink-500/40 hover:bg-pink-500/10"
                 >
                   <svg
-                    className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                    className="h-5 w-5 text-white/70 transition-colors duration-300 group-hover:text-pink-400"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -355,58 +538,54 @@ export default function Home() {
 
           {/* Scroll indicator */}
           <a
-            href="#projects"
-            aria-label="Scroll to projects"
-            className={`absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce transition-opacity duration-700 ${
-              siteVisible ? "opacity-100" : "opacity-0"
-            }`}
+            href="#work"
+            aria-label="Scroll to work"
+            className={`absolute bottom-10 right-6 z-10 hidden flex-col items-center gap-3 sm:flex transition-opacity duration-700 ${siteVisible ? "opacity-100" : "opacity-0"
+              }`}
             style={{ transitionDelay: "1800ms" }}
           >
-            <svg
-              className="h-6 w-6 text-white/40"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-white/40">
+              Scroll
+            </span>
+            <span className="block h-14 w-px overflow-hidden bg-white/10">
+              <span className="scroll-line-inner block h-full w-full bg-gradient-to-b from-transparent via-accent to-transparent" />
+            </span>
           </a>
         </section>
 
-        {/* ── Projects Section ── */}
+        {/* ── Work Section ── */}
         <section
-          id="projects"
-          className="section-snap relative w-full overflow-hidden py-24 section-gradient-projects"
-          style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}
+          id="work"
+          className="section-snap relative w-full overflow-hidden py-28 section-gradient-projects"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "0 900px" }}
         >
           {/* Subtle gradient accents */}
           <div className="pointer-events-none absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/[0.02] blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-white/[0.015] blur-3xl" />
 
-          <div className="relative">
+          <div className="relative mx-auto max-w-6xl px-6 sm:px-10">
             <ScrollReveal>
+              <Eyebrow number="" label="Work" />
+            </ScrollReveal>
+            <ScrollReveal variant="clip">
               <h2
-                className="mb-4 text-center text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl"
-                style={{ fontFamily: "var(--font-display), sans-serif" }}
+                className="text-5xl font-bold tracking-[-0.04em] text-white sm:text-7xl"
+                style={displayFont}
               >
-                Projects
+                Selected Work
               </h2>
-              <p className="mx-auto mb-12 max-w-md text-center text-white/70">
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <p className="mt-5 max-w-md text-white/60">
                 Some of my recent edits — clean cuts, on-beat transitions,
-                cinematic feel.
+                cinematic feel. Hover to preview, click for sound.
               </p>
             </ScrollReveal>
 
-            <div className="mx-auto max-w-5xl grid grid-cols-1 gap-8 px-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((project, i) => (
                 <ScrollReveal key={project.id} delay={i * 150}>
-                  <VideoCard id={project.id} title={project.title} />
+                  <VideoCard id={project.id} title={project.title} index={i} />
                 </ScrollReveal>
               ))}
             </div>
@@ -415,60 +594,83 @@ export default function Home() {
 
         {/* ── Contact Section ── */}
         <section
-          className="section-snap relative w-full overflow-hidden border-t border-white/10 px-4 py-24 section-gradient-contact"
-          style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}
+          id="contact"
+          className="section-snap relative w-full overflow-hidden border-t border-white/10 py-28 section-gradient-contact"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}
         >
           {/* Subtle gradient accent */}
           <div className="pointer-events-none absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.02] blur-3xl" />
 
-          <div className="relative mx-auto max-w-xl text-center">
+          <div className="relative mx-auto max-w-6xl px-6 sm:px-10">
             <ScrollReveal>
+              <Eyebrow number="" label="Contact" />
+            </ScrollReveal>
+            <ScrollReveal variant="clip">
               <h2
-                className="mb-4 text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl"
-                style={{ fontFamily: "var(--font-display), sans-serif" }}
+                className="text-5xl font-bold tracking-[-0.04em] text-white sm:text-7xl"
+                style={displayFont}
               >
-                Get in Touch
+                Get in touch for a project
               </h2>
-              <p className="mb-12 text-white/70">
-                Reach out to me through any of these.
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <p className="mt-5 max-w-md text-white/60">
+                Tell me about your edit — I usually reply within a day.
               </p>
             </ScrollReveal>
 
             <ScrollReveal delay={200}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <MagneticButton
-                  href="mailto:nem.nothing07@gmail.com"
-                  className="group flex h-12 items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 font-medium text-white backdrop-blur-sm transition-colors duration-300 hover:border-white/25 hover:bg-white/10"
-                >
-                  <svg
-                    className="h-5 w-5 text-white/60 transition-colors group-hover:text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                    />
-                  </svg>
-                  <span className="text-sm">nem.nothing07@gmail.com</span>
-                </MagneticButton>
+              <a
+                href="mailto:nem.nothing07@gmail.com"
+                className="link-underline mt-12 inline-block break-all text-2xl font-bold tracking-[-0.03em] text-white sm:text-4xl lg:text-5xl"
+                style={displayFont}
+              >
+                nem.nothing07@gmail.com
+              </a>
+            </ScrollReveal>
 
+            <ScrollReveal delay={300}>
+              <div className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                <span className="text-sm text-white/40">or on Discord —</span>
                 <DiscordButton />
               </div>
             </ScrollReveal>
           </div>
-
-          {/* Footer */}
-          <ScrollReveal delay={400}>
-            <div className="mt-20 text-center text-sm text-white/50">
-              &copy; {new Date().getFullYear()} nem. All rights reserved.
-            </div>
-          </ScrollReveal>
         </section>
+
+        {/* ── Footer ── */}
+        <footer className="border-t border-white/10">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 px-6 py-10 sm:flex-row sm:px-10">
+            <p className="text-sm text-white/40">
+              &copy; {new Date().getFullYear()} nem. All rights reserved.
+            </p>
+            <LocalTime />
+            <div className="flex items-center gap-6">
+              <a
+                href="https://www.youtube.com/@nowherenem"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium uppercase tracking-[0.2em] text-white/50 transition-colors duration-300 hover:text-white"
+              >
+                YouTube
+              </a>
+              <a
+                href="https://www.instagram.com/nowherenem"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium uppercase tracking-[0.2em] text-white/50 transition-colors duration-300 hover:text-white"
+              >
+                Instagram
+              </a>
+              <a
+                href="#top"
+                className="text-xs font-medium uppercase tracking-[0.2em] text-white/50 transition-colors duration-300 hover:text-white"
+              >
+                Top ↑
+              </a>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );

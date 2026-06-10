@@ -43,7 +43,7 @@ export const metadata: Metadata = {
       "Freelance short-form video editor specializing in clean transitions, on-beat cuts, engaging subtitles, and high quality upscaled edits.",
     url: "https://nemportfolio.in",
     siteName: "nem portfolio",
-    images: [{ url: "/image01.jpg", width: 1200, height: 630, alt: "nem — freelance short video editor" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "nem — freelance short video editor" }],
     type: "website",
     locale: "en_US",
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "nem | freelance short video editor",
     description:
       "Freelance short-form video editor — clean transitions, on-beat cuts, engaging subtitles, and high quality upscaled edits.",
-    images: [{ url: "/image01.jpg", alt: "nem — freelance short video editor" }],
+    images: [{ url: "/og.png", alt: "nem — freelance short video editor" }],
   },
   robots: {
     index: true,

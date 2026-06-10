@@ -6,10 +6,12 @@ export default function ScrollReveal({
   children,
   className = "",
   delay = 0,
+  variant = "fade",
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  variant?: "fade" | "clip";
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -33,8 +35,10 @@ export default function ScrollReveal({
     return () => observer.disconnect();
   }, [delay]);
 
+  const baseClass = variant === "clip" ? "scroll-reveal-clip" : "scroll-reveal";
+
   return (
-    <div ref={ref} className={`scroll-reveal ${className}`}>
+    <div ref={ref} className={`${baseClass} ${className}`}>
       {children}
     </div>
   );

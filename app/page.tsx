@@ -197,9 +197,9 @@ function StaggeredTitle({ visible }: { visible: boolean }) {
 
 // ── Video Card with Hover Preview ──
 const projects = [
-  { id: "kCg8ZFXfDkE", title: "Edit #1" },
-  { id: "fQ7S6kTW-WQ", title: "Edit #2" },
-  { id: "W7hyllNaac8", title: "Edit #3" },
+  { id: "pYc4iNnQtus", title: "Mo-graph Edit" },
+  { id: "2ewXEt6vCZM", title: "Mo-graph + Transition Edit" },
+  { id: "aCmsyWt9mkY", title: "Transition Edit" },
 ];
 
 const VideoCard = memo(function VideoCard({

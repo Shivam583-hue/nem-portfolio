@@ -65,6 +65,7 @@ export default function WorkPage() {
   const rafRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ active: false, x: 0, y: 0, moved: 0 });
+  const driftStopped = useRef(false);
 
   // ── Camera lerp loop ──
   const tick = useCallback(() => {
@@ -102,12 +103,33 @@ export default function WorkPage() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
+  // ── Idle drift — gentle float until first interaction ──
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const start = performance.now();
+    const baseX = targetRef.current.x;
+    const baseY = targetRef.current.y;
+    const loop = (now: number) => {
+      if (driftStopped.current) return;
+      const t = (now - start) / 1000;
+      const ramp = Math.min(t / 3, 1); // ease in over 3s
+      targetRef.current.x = baseX + Math.sin(t * 0.3) * 70 * ramp;
+      targetRef.current.y = baseY + Math.sin(t * 0.19 + 1.4) * 50 * ramp;
+      kick();
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [kick]);
+
   // ── Wheel pans the camera ──
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
+      driftStopped.current = true;
       targetRef.current.x += e.deltaX;
       targetRef.current.y += e.deltaY;
       setPlaying(null);
@@ -119,6 +141,7 @@ export default function WorkPage() {
 
   // ── Drag / touch pan ──
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    driftStopped.current = true;
     drag.current = { active: true, x: e.clientX, y: e.clientY, moved: 0 };
   }, []);
 

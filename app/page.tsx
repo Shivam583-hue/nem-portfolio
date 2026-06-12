@@ -589,6 +589,36 @@ export default function Home() {
                 </ScrollReveal>
               ))}
             </div>
+
+            <ScrollReveal delay={200}>
+              <div className="mt-14 flex justify-center">
+                <a
+                  href="/work"
+                  className="group relative flex h-12 items-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/5 px-7 backdrop-blur-sm transition-all duration-300 hover:border-white/25 hover:bg-white/10"
+                >
+                  {/* Sheen sweep */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+                  />
+                  <span className="text-xs font-medium uppercase tracking-[0.25em] text-white/70 transition-colors duration-300 group-hover:text-white">
+                    View all work
+                  </span>
+                  <svg
+                    className="h-4 w-4 text-white/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 

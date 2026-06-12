@@ -143,11 +143,19 @@ export default function WorkPage() {
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     driftStopped.current = true;
     drag.current = { active: true, x: e.clientX, y: e.clientY, moved: 0 };
+    // Capture so pointerup is delivered even if released over an iframe
+    // or outside the window — otherwise the drag gets stuck "on"
+    e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!drag.current.active) return;
+      // Safety net: button is no longer held, end the drag
+      if (e.pointerType === "mouse" && e.buttons === 0) {
+        drag.current.active = false;
+        return;
+      }
       const dx = e.clientX - drag.current.x;
       const dy = e.clientY - drag.current.y;
       drag.current.x = e.clientX;

@@ -65,6 +65,7 @@ export default function WorkPage() {
   const rafRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ active: false, x: 0, y: 0, moved: 0 });
+  const clickTarget = useRef<{ el: HTMLElement; key: string } | null>(null);
   const driftStopped = useRef(false);
 
   // ── Camera lerp loop ──
@@ -139,12 +140,30 @@ export default function WorkPage() {
     return () => el.removeEventListener("wheel", onWheel);
   }, [kick]);
 
+  // ── Center the camera on a card ──
+  const centerOn = useCallback(
+    (el: HTMLElement) => {
+      const rect = el.getBoundingClientRect();
+      const dx = rect.left + rect.width / 2 - viewport.w / 2;
+      const dy = rect.top + rect.height / 2 - viewport.h / 2;
+      if (Math.abs(dx) < CENTER_SNAP && Math.abs(dy) < CENTER_SNAP) return false;
+      targetRef.current.x = currentRef.current.x + dx;
+      targetRef.current.y = currentRef.current.y + dy;
+      kick();
+      return true;
+    },
+    [viewport, kick]
+  );
+
   // ── Drag / touch pan ──
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     driftStopped.current = true;
     drag.current = { active: true, x: e.clientX, y: e.clientY, moved: 0 };
-    // Capture so pointerup is delivered even if released over an iframe
-    // or outside the window — otherwise the drag gets stuck "on"
+    // Track which card was clicked (if any) for click-on-pointerup
+    const card = (e.target as HTMLElement).closest<HTMLElement>("[data-card-key]");
+    clickTarget.current = card
+      ? { el: card, key: card.dataset.cardKey! }
+      : null;
     e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
 
@@ -170,32 +189,14 @@ export default function WorkPage() {
   );
 
   const onPointerUp = useCallback(() => {
+    const wasClick = drag.current.moved <= 6;
     drag.current.active = false;
-  }, []);
-
-  // ── Center the camera on a card ──
-  const centerOn = useCallback(
-    (el: HTMLElement) => {
-      const rect = el.getBoundingClientRect();
-      const dx = rect.left + rect.width / 2 - viewport.w / 2;
-      const dy = rect.top + rect.height / 2 - viewport.h / 2;
-      if (Math.abs(dx) < CENTER_SNAP && Math.abs(dy) < CENTER_SNAP) return false;
-      targetRef.current.x = currentRef.current.x + dx;
-      targetRef.current.y = currentRef.current.y + dy;
-      kick();
-      return true;
-    },
-    [viewport, kick]
-  );
-
-  const onCardClick = useCallback(
-    (e: React.MouseEvent, key: string) => {
-      if (drag.current.moved > 6) return; // was a drag, not a click
-      centerOn(e.currentTarget as HTMLElement);
-      setPlaying(key);
-    },
-    [centerOn]
-  );
+    if (wasClick && clickTarget.current) {
+      centerOn(clickTarget.current.el);
+      setPlaying(clickTarget.current.key);
+    }
+    clickTarget.current = null;
+  }, [centerOn]);
 
   // ── Visible instances (infinite tiling) ──
   const instances: Instance[] = [];
@@ -265,6 +266,7 @@ export default function WorkPage() {
           return (
             <div
               key={inst.key}
+              data-card-key={inst.key}
               className="absolute top-0 left-0 will-change-transform"
               style={{
                 width: CARD_W,
@@ -272,7 +274,6 @@ export default function WorkPage() {
                 transform: `translate3d(${sx}px, ${sy}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`,
                 opacity: 1 - d2 * 0.4,
               }}
-              onClick={(e) => onCardClick(e, inst.key)}
             >
               <div className="group relative h-full w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl shadow-black/40 transition-colors duration-300 hover:border-white/30">
                 {isPlaying ? (

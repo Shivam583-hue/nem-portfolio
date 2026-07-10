@@ -13,14 +13,18 @@ const CustomCursor = dynamic(() => import("../custom-cursor"), { ssr: false });
 const displayFont = { fontFamily: "var(--font-display), sans-serif" };
 
 const videos = [
+  "CxWbzUZPQZ0",
   "kCg8ZFXfDkE",
   "fQ7S6kTW-WQ",
   "W7hyllNaac8",
-  "2ewXEt6vCZM",
   "aCmsyWt9mkY",
   "KKXb8cjhZH4",
-  "9FsrYBzPpxw",
+  "2ewXEt6vCZM",
   "pYc4iNnQtus",
+  "Cy6YQKpFKsc",
+  "VvtZqiXhMTc",
+  "p0-bzQw_jKQ",
+  "dyQBZeIKR18",
 ];
 
 // ── Lattice geometry ──
@@ -29,7 +33,7 @@ const CARD_H = Math.round((CARD_W * 16) / 9);
 const CELL_W = CARD_W + 130;
 const CELL_H = CARD_H + 180;
 const COLS = 4;
-const ROWS = 2;
+const ROWS = 3;
 const TILE_W = CELL_W * COLS;
 const TILE_H = CELL_H * ROWS;
 const MAX_TILT = 30; // deg at viewport edges

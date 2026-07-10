@@ -148,15 +148,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scroll snap */
-html {
-  scroll-snap-type: y proximity;
-}
-
-.section-snap {
-  scroll-snap-align: start;
-}
-
 /* Scroll indicator — travelling line */
 @keyframes scroll-line-travel {
   0% {
@@ -232,6 +223,5 @@ html {
   }
   html {
     scroll-behavior: auto;
-    scroll-snap-type: none;
   }
 }

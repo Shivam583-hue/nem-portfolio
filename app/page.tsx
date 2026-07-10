@@ -429,7 +429,7 @@ export default function Home() {
           }`}
       >
         {/* ── Hero Section ── */}
-        <section className="section-snap relative min-h-[100svh] w-full overflow-hidden">
+        <section className="relative min-h-[100svh] w-full overflow-hidden">
           {/* Background video — blurred, with parallax */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <div ref={parallaxRef} className="absolute inset-0 will-change-transform">
@@ -556,7 +556,7 @@ export default function Home() {
         {/* ── Work Section ── */}
         <section
           id="work"
-          className="section-snap relative w-full overflow-hidden py-28 section-gradient-projects"
+          className="relative w-full overflow-hidden py-28 section-gradient-projects"
           style={{ contentVisibility: "auto", containIntrinsicSize: "0 900px" }}
         >
           {/* Subtle gradient accents */}
@@ -625,7 +625,7 @@ export default function Home() {
         {/* ── Contact Section ── */}
         <section
           id="contact"
-          className="section-snap relative w-full overflow-hidden border-t border-white/10 py-28 section-gradient-contact"
+          className="relative w-full overflow-hidden border-t border-white/10 py-28 section-gradient-contact"
           style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}
         >
           {/* Subtle gradient accent */}

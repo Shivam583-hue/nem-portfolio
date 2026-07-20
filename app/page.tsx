@@ -510,6 +510,33 @@ export default function Home() {
                   Instagram
                 </MagneticButton>
               </div>
+
+              <div
+                className={`mt-7 transition-all duration-700 ${siteVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+                  }`}
+                style={{ transitionDelay: "1700ms" }}
+              >
+                <a
+                  href="#work"
+                  className="link-underline group inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors duration-300 hover:text-white"
+                >
+                  or see selected work
+                  <svg
+                    className="h-4 w-4 text-accent transition-transform duration-300 group-hover:translate-y-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M6 13l6 6 6-6" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
 

@@ -27,7 +27,6 @@ const videos = [
   "dyQBZeIKR18",
 ];
 
-// ── Lattice geometry ──
 const CARD_W = 280;
 const CARD_H = Math.round((CARD_W * 16) / 9);
 const CELL_W = CARD_W + 130;
@@ -36,12 +35,10 @@ const COLS = 4;
 const ROWS = 3;
 const TILE_W = CELL_W * COLS;
 const TILE_H = CELL_H * ROWS;
-const MAX_TILT = 30; // deg at viewport edges
-const DEPTH = 460; // px pushed back at edges
-const CENTER_SNAP = 70; // px — "already centered" radius
+const MAX_TILT = 30;
+const DEPTH = 460;
+const CENTER_SNAP = 70;
 
-// Base position of each video within one repeating tile,
-// alternate rows offset by half a cell (football-stitch stagger)
 const basePositions = videos.map((_, i) => {
   const col = i % COLS;
   const row = Math.floor(i / COLS);
@@ -55,8 +52,8 @@ type Instance = {
   key: string;
   video: string;
   index: number;
-  wx: number; // world x
-  wy: number; // world y
+  wx: number;
+  wy: number;
 };
 
 export default function WorkPage() {
@@ -72,7 +69,6 @@ export default function WorkPage() {
   const clickTarget = useRef<{ el: HTMLElement; key: string } | null>(null);
   const driftStopped = useRef(false);
 
-  // ── Camera lerp loop ──
   const tick = useCallback(() => {
     const t = targetRef.current;
     const c = currentRef.current;
@@ -95,7 +91,6 @@ export default function WorkPage() {
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
-  // ── Viewport + initial centering on first card ──
   useEffect(() => {
     const measure = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
     measure();
@@ -108,7 +103,6 @@ export default function WorkPage() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // ── Idle drift — gentle float until first interaction ──
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
@@ -118,7 +112,7 @@ export default function WorkPage() {
     const loop = (now: number) => {
       if (driftStopped.current) return;
       const t = (now - start) / 1000;
-      const ramp = Math.min(t / 3, 1); // ease in over 3s
+      const ramp = Math.min(t / 3, 1);
       targetRef.current.x = baseX + Math.sin(t * 0.3) * 70 * ramp;
       targetRef.current.y = baseY + Math.sin(t * 0.19 + 1.4) * 50 * ramp;
       kick();
@@ -128,7 +122,6 @@ export default function WorkPage() {
     return () => cancelAnimationFrame(raf);
   }, [kick]);
 
-  // ── Wheel pans the camera ──
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -144,7 +137,6 @@ export default function WorkPage() {
     return () => el.removeEventListener("wheel", onWheel);
   }, [kick]);
 
-  // ── Center the camera on a card ──
   const centerOn = useCallback(
     (el: HTMLElement) => {
       const rect = el.getBoundingClientRect();
@@ -159,11 +151,9 @@ export default function WorkPage() {
     [viewport, kick]
   );
 
-  // ── Drag / touch pan ──
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     driftStopped.current = true;
     drag.current = { active: true, x: e.clientX, y: e.clientY, moved: 0 };
-    // Track which card was clicked (if any) for click-on-pointerup
     const card = (e.target as HTMLElement).closest<HTMLElement>("[data-card-key]");
     clickTarget.current = card
       ? { el: card, key: card.dataset.cardKey! }
@@ -174,7 +164,6 @@ export default function WorkPage() {
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!drag.current.active) return;
-      // Safety net: button is no longer held, end the drag
       if (e.pointerType === "mouse" && e.buttons === 0) {
         drag.current.active = false;
         return;
@@ -202,7 +191,6 @@ export default function WorkPage() {
     clickTarget.current = null;
   }, [centerOn]);
 
-  // ── Visible instances (infinite tiling) ──
   const instances: Instance[] = [];
   if (viewport.w > 0) {
     const pad = CELL_W / 2;
@@ -239,11 +227,9 @@ export default function WorkPage() {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {/* Subtle gradient accents, same as the home work section */}
         <div className="pointer-events-none absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/[0.02] blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-white/[0.015] blur-3xl" />
 
-        {/* Vignette — darkens the edges to sell the sphere depth */}
         <div
           className="pointer-events-none absolute inset-0 z-10"
           style={{
@@ -255,15 +241,12 @@ export default function WorkPage() {
         {instances.map((inst) => {
           const sx = inst.wx - offset.x;
           const sy = inst.wy - offset.y;
-          // normalized distance of the card centre from screen centre
           const ndx = (sx + CARD_W / 2 - viewport.w / 2) / (viewport.w / 2 + CARD_W);
           const ndy = (sy + CARD_H / 2 - viewport.h / 2) / (viewport.h / 2 + CARD_H);
           const rotY = -ndx * MAX_TILT;
           const rotX = ndy * MAX_TILT;
           const d2 = Math.min(ndx * ndx + ndy * ndy, 1);
-          // Concave: centre card sits deepest, edges curve toward the viewer
           const tz = -DEPTH * (1 - d2);
-          // Counteract perspective shrink so the centre card reads biggest
           const scale = 1 + (1 - d2) * 0.25;
           const isPlaying = playing === inst.key;
 
@@ -331,7 +314,6 @@ export default function WorkPage() {
         })}
       </div>
 
-      {/* ── Overlay header ── */}
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-5 sm:px-10">
         <a
           href="/"
@@ -361,7 +343,6 @@ export default function WorkPage() {
         </h1>
       </header>
 
-      {/* ── Hint ── */}
       <p className="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/5 bg-black/40 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.3em] text-white/40 backdrop-blur-md">
         Scroll or drag to explore
       </p>

@@ -8,7 +8,6 @@ const CustomCursor = dynamic(() => import("./custom-cursor"), { ssr: false });
 
 const displayFont = { fontFamily: "var(--font-display), sans-serif" };
 
-// ── Magnetic Button ──
 function MagneticButton({
   children,
   className,
@@ -74,7 +73,6 @@ function MagneticButton({
   );
 }
 
-// ── Loading Screen ──
 function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
 
@@ -116,7 +114,6 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// ── Fixed Nav (appears after the hero) ──
 function Nav() {
   const [shown, setShown] = useState(false);
 
@@ -161,7 +158,6 @@ function Nav() {
   );
 }
 
-// ── Staggered Hero Title ──
 function StaggeredTitle({ visible }: { visible: boolean }) {
   const letters = "nem".split("");
   return (
@@ -195,7 +191,6 @@ function StaggeredTitle({ visible }: { visible: boolean }) {
 }
 
 
-// ── Video Card with Hover Preview ──
 const projects = [
   { id: "pYc4iNnQtus", title: "Mo-graph Edit" },
   { id: "2ewXEt6vCZM", title: "Mo-graph + Transition Edit" },
@@ -313,7 +308,6 @@ const VideoCard = memo(function VideoCard({
   );
 });
 
-// ── Discord Button ──
 function DiscordButton() {
   const [copied, setCopied] = useState(false);
 
@@ -341,7 +335,6 @@ function DiscordButton() {
   );
 }
 
-// ── Local Time (footer) ──
 function LocalTime() {
   const [time, setTime] = useState("--:--");
 
@@ -363,7 +356,6 @@ function LocalTime() {
   return <span className="font-mono text-sm text-white/40">IST — {time}</span>;
 }
 
-// ── Section Eyebrow ──
 function Eyebrow({ number, label }: { number: string; label: string }) {
   return (
     <p className="mb-5 font-mono text-xs uppercase tracking-[0.35em] text-white/40">
@@ -372,13 +364,11 @@ function Eyebrow({ number, label }: { number: string; label: string }) {
   );
 }
 
-// ── Main Page ──
 export default function Home() {
   const [intro, setIntro] = useState<"pending" | "loader" | "done">("pending");
   const [siteVisible, setSiteVisible] = useState(false);
   const parallaxRef = useRef<HTMLDivElement>(null);
 
-  // Show the intro loader once per session
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       if (sessionStorage.getItem("nem-intro-seen")) {
@@ -397,7 +387,6 @@ export default function Home() {
     setTimeout(() => setSiteVisible(true), 100);
   }, []);
 
-  // Hero video parallax
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
@@ -428,9 +417,7 @@ export default function Home() {
         className={`w-full transition-opacity duration-700 ${siteVisible ? "opacity-100" : "opacity-0"
           }`}
       >
-        {/* ── Hero Section ── */}
         <section className="relative min-h-[100svh] w-full overflow-hidden">
-          {/* Background video — blurred, with parallax */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <div ref={parallaxRef} className="absolute inset-0 will-change-transform">
               <video
@@ -445,12 +432,10 @@ export default function Home() {
                 <source src="/video.mp4" type="video/mp4" />
               </video>
             </div>
-            {/* Darkened scrim for the glass card */}
             <div className="absolute inset-0 bg-black/60" />
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
           </div>
 
-          {/* Content — centered glass card */}
           <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 py-24 sm:px-10">
             <div
               className={`w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl transition-all duration-700 sm:p-12 ${siteVisible
@@ -536,7 +521,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Scroll indicator */}
           <a
             href="#work"
             aria-label="Scroll to work"
@@ -553,13 +537,11 @@ export default function Home() {
           </a>
         </section>
 
-        {/* ── Work Section ── */}
         <section
           id="work"
           className="relative w-full overflow-hidden py-28 section-gradient-projects"
           style={{ contentVisibility: "auto", containIntrinsicSize: "0 900px" }}
         >
-          {/* Subtle gradient accents */}
           <div className="pointer-events-none absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/[0.02] blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-white/[0.015] blur-3xl" />
 
@@ -594,18 +576,17 @@ export default function Home() {
               <div className="mt-14 flex justify-center">
                 <a
                   href="/work"
-                  className="group relative flex h-12 items-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/5 px-7 backdrop-blur-sm transition-all duration-300 hover:border-white/25 hover:bg-white/10"
+                  className="group relative flex h-14 items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-white/[0.06] px-9 shadow-[0_0_35px_rgba(255,79,46,0.12)] backdrop-blur-sm transition-all duration-300 hover:border-accent/60 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(255,79,46,0.25)]"
                 >
-                  {/* Sheen sweep */}
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+                    className="cta-sheen pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent"
                   />
-                  <span className="text-xs font-medium uppercase tracking-[0.25em] text-white/70 transition-colors duration-300 group-hover:text-white">
+                  <span className="text-sm font-medium uppercase tracking-[0.25em] text-white/90 transition-colors duration-300 group-hover:text-white">
                     View all work
                   </span>
                   <svg
-                    className="h-4 w-4 text-white/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white"
+                    className="h-4 w-4 text-accent transition-transform duration-300 group-hover:translate-x-1"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -622,13 +603,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Contact Section ── */}
         <section
           id="contact"
           className="relative w-full overflow-hidden border-t border-white/10 py-28 section-gradient-contact"
           style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}
         >
-          {/* Subtle gradient accent */}
           <div className="pointer-events-none absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.02] blur-3xl" />
 
           <div className="relative mx-auto max-w-6xl px-6 sm:px-10">
@@ -668,7 +647,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Footer ── */}
         <footer className="border-t border-white/10">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 px-6 py-10 sm:flex-row sm:px-10">
             <p className="text-sm text-white/40">

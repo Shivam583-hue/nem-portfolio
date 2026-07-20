@@ -26,7 +26,6 @@ body {
   color: #0a0a0a;
 }
 
-/* Themed scrollbar */
 html {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.18) #0a0a0a;
@@ -50,7 +49,6 @@ html {
   background: rgba(255, 255, 255, 0.28);
 }
 
-/* Film grain overlay */
 body::after {
   content: "";
   position: fixed;
@@ -63,7 +61,6 @@ body::after {
   background-size: 256px 256px;
 }
 
-/* Subtle gradient backgrounds for sections */
 .section-gradient-projects {
   background: linear-gradient(
     180deg,
@@ -85,7 +82,6 @@ body::after {
   );
 }
 
-/* Animated underline for big links */
 .link-underline {
   position: relative;
 }
@@ -108,14 +104,12 @@ body::after {
   transform: scaleX(1);
 }
 
-/* Hide default cursor on non-touch devices */
 @media (pointer: fine) {
   *, *::before, *::after {
     cursor: none !important;
   }
 }
 
-/* Scroll-triggered reveal — fade up */
 .scroll-reveal {
   opacity: 0;
   transform: translateY(30px);
@@ -128,9 +122,6 @@ body::after {
   transform: translateY(0);
 }
 
-/* Scroll-triggered reveal — clip (headings).
-   The clip lives on the child: fully clipping the observed wrapper
-   would zero out its intersection area and the observer would never fire. */
 .scroll-reveal-clip > * {
   clip-path: inset(0 0 100% 0);
   transform: translateY(18%);
@@ -148,7 +139,20 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scroll indicator — travelling line */
+@keyframes cta-sheen-sweep {
+  0%,
+  62% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
+}
+
+.cta-sheen {
+  animation: cta-sheen-sweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 @keyframes scroll-line-travel {
   0% {
     transform: translateY(-100%);
@@ -162,7 +166,6 @@ html {
   animation: scroll-line-travel 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Loading screen */
 @keyframes loader-letter-in {
   0% {
     opacity: 0;
@@ -196,7 +199,6 @@ html {
   animation: loader-line-expand 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Staggered hero title */
 @keyframes stagger-in {
   0% {
     opacity: 0;

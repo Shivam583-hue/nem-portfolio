@@ -10,7 +10,6 @@ export default function CustomCursor() {
   const visible = useRef(false);
   const hovering = useRef(false);
   const raf = useRef(0);
-  // Rendered with ssr: false, so window is available on first render
   const [isTouch] = useState(
     () => window.matchMedia("(pointer: coarse)").matches
   );
@@ -62,9 +61,6 @@ export default function CustomCursor() {
       if (ringRef.current) ringRef.current.style.opacity = "0";
     };
 
-    // Cross-origin iframes (YouTube embeds) swallow mouse events, which
-    // would freeze the custom cursor at the iframe edge — hide it instead
-    // and let the embed's native cursor take over.
     const onMouseOut = (e: MouseEvent) => {
       const related = e.relatedTarget as HTMLElement | null;
       if (related?.tagName === "IFRAME") {
@@ -73,12 +69,10 @@ export default function CustomCursor() {
     };
 
     const animate = () => {
-      // Dot follows instantly
       if (dotRef.current) {
         dotRef.current.style.left = pos.current.x + "px";
         dotRef.current.style.top = pos.current.y + "px";
       }
-      // Ring follows with lerp
       ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.15;
       ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.15;
       if (ringRef.current) {
@@ -107,7 +101,6 @@ export default function CustomCursor() {
 
   return (
     <>
-      {/* Dot */}
       <div
         ref={dotRef}
         className="pointer-events-none fixed z-[10001] h-2 w-2 rounded-full bg-white mix-blend-difference"
@@ -120,7 +113,6 @@ export default function CustomCursor() {
           willChange: "left, top, transform",
         }}
       />
-      {/* Ring */}
       <div
         ref={ringRef}
         className="pointer-events-none fixed z-[10001] rounded-full border border-white/30 mix-blend-difference"

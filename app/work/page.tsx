@@ -4,6 +4,7 @@ import {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useCallback,
 } from "react";
 import dynamic from "next/dynamic";
@@ -70,7 +71,7 @@ export default function WorkPage() {
   const clickTarget = useRef<{ el: HTMLElement; key: string } | null>(null);
   const driftStopped = useRef(false);
 
-  const tick = useCallback(() => {
+  const tick = useCallback(function step() {
     const t = targetRef.current;
     const c = currentRef.current;
     c.x += (t.x - c.x) * 0.09;
@@ -83,7 +84,7 @@ export default function WorkPage() {
       return;
     }
     setOffset({ x: c.x, y: c.y });
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = requestAnimationFrame(step);
   }, []);
 
   const kick = useCallback(() => {
@@ -92,7 +93,7 @@ export default function WorkPage() {
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const measure = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
     measure();
     const ox = basePositions[0].x + CARD_W / 2 - window.innerWidth / 2;

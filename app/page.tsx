@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import ScrollReveal from "./scroll-reveal";
 
 const CustomCursor = dynamic(() => import("./custom-cursor"), { ssr: false });
@@ -565,7 +566,7 @@ export default function Home() {
 
             <ScrollReveal delay={200}>
               <div className="mt-14 flex justify-center">
-                <a
+                <Link
                   href="/work"
                   className="group relative flex h-14 items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-white/[0.06] px-9 shadow-[0_0_35px_rgba(255,79,46,0.12)] backdrop-blur-sm transition-all duration-300 hover:border-accent/60 hover:bg-white/10 hover:shadow-[0_0_50px_rgba(255,79,46,0.25)]"
                 >
@@ -588,7 +589,7 @@ export default function Home() {
                   >
                     <path d="M5 12h14M13 6l6 6-6 6" />
                   </svg>
-                </a>
+                </Link>
               </div>
             </ScrollReveal>
           </div>

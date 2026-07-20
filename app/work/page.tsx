@@ -7,6 +7,7 @@ import {
   useCallback,
 } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const CustomCursor = dynamic(() => import("../custom-cursor"), { ssr: false });
 
@@ -315,7 +316,7 @@ export default function WorkPage() {
       </div>
 
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-5 sm:px-10">
-        <a
+        <Link
           href="/"
           className="pointer-events-auto flex h-10 items-center gap-2 rounded-full border border-white/10 bg-black/40 px-5 backdrop-blur-md transition-colors duration-300 hover:border-white/25 hover:bg-black/60"
         >
@@ -334,7 +335,7 @@ export default function WorkPage() {
           <span className="text-xs font-medium uppercase tracking-[0.25em] text-white/70">
             Back
           </span>
-        </a>
+        </Link>
         <h1
           className="text-lg font-bold tracking-[-0.04em] text-white"
           style={displayFont}

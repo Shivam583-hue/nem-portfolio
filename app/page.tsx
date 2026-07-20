@@ -444,15 +444,6 @@ export default function Home() {
                 }`}
               style={{ transitionDelay: "400ms" }}
             >
-              <div
-                className={`mb-6 transition-all duration-700 ${siteVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-                  }`}
-                style={{ transitionDelay: "1200ms" }}
-              >
-              </div>
-
               <StaggeredTitle visible={siteVisible} />
 
               <p

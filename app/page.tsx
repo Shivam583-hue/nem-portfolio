@@ -467,7 +467,25 @@ export default function Home() {
                 I&apos;m a self-taught video editor with short length video
                 editing experience. I focus on clean transitions, effects
                 which suit the edit, engaging subtitles, sound effects, and
-                high quality upscaled edits to maximize audience retention.
+                high quality upscaled edits to maximize audience retention.{" "}
+                <a
+                  href="#work"
+                  className="link-underline inline-flex items-center gap-1.5 whitespace-nowrap font-medium text-white"
+                >
+                  See my work
+                  <svg
+                    className="h-3.5 w-3.5 text-accent"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M6 13l6 6 6-6" />
+                  </svg>
+                </a>
               </p>
 
               <div
@@ -509,33 +527,6 @@ export default function Home() {
                   </svg>
                   Instagram
                 </MagneticButton>
-              </div>
-
-              <div
-                className={`mt-7 transition-all duration-700 ${siteVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-                  }`}
-                style={{ transitionDelay: "1700ms" }}
-              >
-                <a
-                  href="#work"
-                  className="link-underline group inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors duration-300 hover:text-white"
-                >
-                  or see selected work
-                  <svg
-                    className="h-4 w-4 text-accent transition-transform duration-300 group-hover:translate-y-0.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 5v14M6 13l6 6 6-6" />
-                  </svg>
-                </a>
               </div>
             </div>
           </div>
